@@ -40,7 +40,6 @@ let borrows = JSON.parse(localStorage.getItem("borrows")) || [
   {user:"member2", bookId:3, title:"Operating Systems", due:"2024-02-01", fine:60, paid:false},
   {user:"member3", bookId:5, title:"Software Engineering", due:"2024-01-15", fine:80, paid:false},
   {user:"member3", bookId:7, title:"Data Structures", due:"2024-03-01", fine:0, paid:true},
-  {user:"member4", bookId:9, title:"Cyber Security", due:"2024-01-10", fine:120, paid:false},
   {user:"member5", bookId:10, title:"Cloud Computing", due:"2024-03-20", fine:0, paid:true}
 ];
 
