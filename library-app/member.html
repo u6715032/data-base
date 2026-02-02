@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body onload="load()">
+<button onclick="logout()">Logout</button>
+ 
+ 
+<h2>Member Page</h2>
+ 
+<h3>Search Books</h3>
+<input id="searchBox" placeholder="Search by title, year, ISBN, publisher, category">
+<button onclick="search()">Search</button>
+ 
+ 
+<h3>Books</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Title</th>
+<th>Year</th>
+<th>ISBN</th>
+<th>Publisher</th>
+<th>Category</th>
+<th>Location</th>
+<th>Qty</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="bookTable"></tbody>
+</table>
+ 
+<h3>Borrow History</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Title</th>
+<th>Due Date</th>
+<th>Fine</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="borrowTable"></tbody>
+</table>
+ 
+<script src="data.js"></script>
+<script>
+let user = localStorage.getItem("currentUser");
+ 
+function load(){
+  showBooks(books);
+  showBorrows();
+}
+ 
+function logout(){
+  localStorage.removeItem("currentUser");
+  location = "index.html";
+}
+ 
+ 
+function showBooks(list){
+  let t="";
+  list.forEach(b=>{
+    t+=`<tr>
+      <td>${b.title}</td>
+      <td>${b.year}</td>
+      <td>${b.isbn}</td>
+      <td>${b.publisherId}</td>
+      <td>${b.categoryId}</td>
+      <td>${b.location}</td>
+      <td>${b.qty}</td>
+      <td><button onclick="reserve(${b.id})">Reserve</button></td>
+    </tr>`;
+  });
+  bookTable.innerHTML=t;
+}
+ 
+ 
+function search(){
+  let key = searchBox.value.toLowerCase();
+ 
+  let result = books.filter(b =>
+    b.title.toLowerCase().includes(key) ||
+    b.year.toString().includes(key) ||
+    b.isbn.toLowerCase().includes(key) ||
+    b.publisherId.toString().includes(key) ||
+    b.categoryId.toString().includes(key)
+  );
+ 
+  showBooks(result);
+}
+ 
+ 
+function reserve(id){
+  reservations.push({bookId:id,user:user});
+  saveData();
+  alert("Reservation sent");
+}
+ 
+function showBorrows(){
+  let t="";
+  borrows.filter(b=>b.user==user).forEach(b=>{
+    t+=`<tr>
+      <td>${b.title}</td>
+      <td>${b.due}</td>
+      <td>${b.fine}</td>
+      <td>${b.paid ? "Paid" : "Unpaid"}</td>
+    </tr>`;
+  });
+  borrowTable.innerHTML=t;
+}
+ 
+</script>
+</body>
+</html>

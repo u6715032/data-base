@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body onload="load()">
+
+<button onclick="logout()">Logout</button>
+<h2>Admin Page</h2>
+
+<!-- USERS -->
+<h3>Users</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Username</th>
+<th>Role</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="userTable"></tbody>
+</table>
+
+<hr>
+
+<!-- SEARCH BOOK -->
+<h3>Search Books</h3>
+<input id="sTitle" placeholder="Title">
+<input id="sYear" placeholder="Year">
+<input id="sISBN" placeholder="ISBN">
+<input id="sPublisher" placeholder="Publisher ID">
+<input id="sCategory" placeholder="Category ID">
+<button onclick="searchBooks()">Search</button>
+<button onclick="showBooks()">Show All</button>
+
+<!-- ADD BOOK -->
+<h3>Add New Book</h3>
+<input id="title" placeholder="Title">
+<input id="year" placeholder="Year">
+<input id="isbn" placeholder="ISBN">
+<input id="publisher" placeholder="Publisher ID">
+<input id="category" placeholder="Category ID">
+<input id="location" placeholder="Location">
+<input id="qty" placeholder="Quantity">
+<button onclick="addBook()">Add Book</button>
+
+<!-- BOOKS -->
+<h3>All Books</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Title</th>
+<th>Year</th>
+<th>ISBN</th>
+<th>Publisher</th>
+<th>Category</th>
+<th>Location</th>
+<th>Qty</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="bookTable"></tbody>
+</table>
+
+<hr>
+
+<!-- BORROWED -->
+<h3>Borrowed Books & Fines</h3>
+<table border="1">
+<thead>
+<tr>
+<th>User</th>
+<th>Book</th>
+<th>Due Date</th>
+<th>Fine</th>
+<th>Paid</th>
+</tr>
+</thead>
+<tbody id="borrowTable"></tbody>
+</table>
+
+<script src="data.js"></script>
+<script>
+function logout(){
+  localStorage.removeItem("currentUser");
+  location="index.html";
+}
+
+function load(){
+  showUsers();
+  showBooks();
+  showBorrows();
+}
+
+/* -------- USERS -------- */
+function showUsers(){
+  let t="";
+  users.forEach((u,i)=>{
+    t+=`<tr>
+      <td>${u.username}</td>
+      <td>${u.role}</td>
+      <td>${u.banned?"Banned":"Active"}</td>
+      <td><button onclick="toggleBan(${i})">${u.banned?"Unban":"Ban"}</button></td>
+    </tr>`;
+  });
+  userTable.innerHTML=t;
+}
+
+function toggleBan(i){
+  users[i].banned = !users[i].banned;
+  saveData();
+  showUsers();
+}
+
+/* -------- BOOK SEARCH -------- */
+function searchBooks(){
+  let t = sTitle.value.toLowerCase();
+  let y = sYear.value;
+  let i = sISBN.value;
+  let p = sPublisher.value;
+  let c = sCategory.value;
+
+  let filtered = books.filter(b =>
+    (t=="" || b.title.toLowerCase().includes(t)) &&
+    (y=="" || b.year==y) &&
+    (i=="" || b.isbn.includes(i)) &&
+    (p=="" || b.publisherId==p) &&
+    (c=="" || b.categoryId==c)
+  );
+
+  displayBooks(filtered);
+}
+
+/* -------- BOOKS -------- */
+function showBooks(){
+  displayBooks(books);
+}
+
+function displayBooks(list){
+  let t="";
+  list.forEach((b,i)=>{
+    t+=`<tr>
+      <td>${b.title}</td>
+      <td>${b.year}</td>
+      <td>${b.isbn}</td>
+      <td>${b.publisherId}</td>
+      <td>${b.categoryId}</td>
+      <td>${b.location}</td>
+      <td>${b.qty}</td>
+      <td><button onclick="deleteBook(${i})">Delete</button></td>
+    </tr>`;
+  });
+  bookTable.innerHTML=t;
+}
+
+function addBook(){
+  let newBook = {
+    id: books.length + 1,
+    title: title.value,
+    year: year.value,
+    isbn: isbn.value,
+    publisherId: publisher.value,
+    categoryId: category.value,
+    location: location.value,
+    qty: parseInt(qty.value)
+  };
+  books.push(newBook);
+  saveData();
+  showBooks();
+  alert("Book added");
+}
+
+function deleteBook(i){
+  books.splice(i,1);
+  saveData();
+  showBooks();
+}
+
+/* -------- BORROWS -------- */
+function showBorrows(){
+  let t="";
+  borrows.forEach(b=>{
+    t+=`<tr>
+      <td>${b.user}</td>
+      <td>${b.title}</td>
+      <td>${b.due}</td>
+      <td>${b.fine}</td>
+      <td>${b.paid ? "Paid" : "Unpaid"}</td>
+    </tr>`;
+  });
+  borrowTable.innerHTML=t;
+}
+</script>
+
+</body>
+</html>

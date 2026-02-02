@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+</head>
+<body onload="load()">
+<button onclick="logout()">Logout</button>
+ 
+<h2>Staff Page</h2>
+ 
+<h3>Search Books</h3>
+<input id="searchBox" placeholder="Search by title, year, ISBN, publisher, category">
+<button onclick="search()">Search</button>
+ 
+ 
+<h3>Books</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Title</th>
+<th>Year</th>
+<th>ISBN</th>
+<th>Publisher</th>
+<th>Category</th>
+<th>Qty</th>
+</tr>
+</thead>
+<tbody id="bookTable"></tbody>
+</table>
+ 
+<h3>Reservation Requests</h3>
+<table border="1">
+<thead>
+<tr>
+<th>Book</th>
+<th>User</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="resTable"></tbody>
+</table>
+ 
+<h3>Borrowed Books</h3>
+<table border="1">
+<thead>
+<tr>
+<tr>
+<th>Book</th>
+<th>User</th>
+<th>Due Date</th>
+<th>Fine</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="borrowTable"></tbody>
+</table>
+ 
+<script src="data.js"></script>
+<script>
+function load(){
+  showBooks(books);
+  showReservations();
+  showBorrows();
+}
+ 
+/* ---------- BOOK SEARCH ---------- */
+ 
+function logout(){
+  localStorage.removeItem("currentUser");
+  location = "index.html";
+}
+ 
+function showBooks(list){
+  let t="";
+  list.forEach(b=>{
+    t+=`<tr>
+      <td>${b.title}</td>
+      <td>${b.year}</td>
+      <td>${b.isbn}</td>
+      <td>${b.publisherId}</td>
+      <td>${b.categoryId}</td>
+      <td>${b.qty}</td>
+    </tr>`;
+  });
+  bookTable.innerHTML=t;
+}
+ 
+ 
+function search(){
+  let key = searchBox.value.toLowerCase();
+ 
+  let result = books.filter(b =>
+    b.title.toLowerCase().includes(key) ||
+    b.year.toString().includes(key) ||
+    b.isbn.toLowerCase().includes(key) ||
+    b.publisherId.toString().includes(key) ||
+    b.categoryId.toString().includes(key)
+  );
+ 
+  showBooks(result);
+}
+ 
+ 
+/* ---------- RESERVATIONS ---------- */
+function showReservations(){
+  let t="";
+  reservations.forEach((r,i)=>{
+    let book = books[r.bookId];   // USE INDEX
+
+    if(!book) return; // safety
+
+    t+=`<tr>
+      <td>${book.title}</td>
+      <td>${r.user}</td>
+      <td><button onclick="approve(${i})">Approve</button></td>
+    </tr>`;
+  });
+  resTable.innerHTML=t;
+}
+
+ 
+function approve(i){
+  let r = reservations[i];
+  let book = books[r.bookId];
+
+  if(book.qty <= 0){
+    alert("No stock available");
+    return;
+  }
+
+  book.qty--;
+
+  let due = new Date();
+  due.setDate(due.getDate() + 7);
+
+  borrows.push({
+    user: r.user,
+    bookId: r.bookId,
+    title: book.title,
+    due: due.toDateString(),
+    fine: r.fine || 0
+  });
+
+  reservations.splice(i,1);
+  saveData();
+  load();
+  alert("Book issued");
+}
+
+ 
+/* ---------- RETURNS ---------- */
+function showBorrows(){
+  let t="";
+  borrows.forEach((b,i)=>{
+    t+=`<tr>
+      <td>${b.title}</td>
+      <td>${b.user}</td>
+      <td>${b.due}</td>
+      <td>${b.fine}</td>
+      <td><button onclick="returnBook(${i})">Receive & Pay</button></td>
+    </tr>`;
+  });
+  borrowTable.innerHTML=t;
+}
+ 
+ 
+function returnBook(i){
+  let b = borrows[i];
+  let book = books[b.bookId];
+
+  book.qty++;
+
+  b.paid = true;
+  borrows.splice(i,1);
+
+  saveData();
+  load();
+  alert("Book returned and fine paid");
+}
+
+ 
+</script>
+</body>
+</html>
